@@ -2,8 +2,10 @@ from math import floor
 import random as rn
 import matplotlib.pyplot as plt
 import numpy as np
+
 population = np.linspace(2,4,100)
-fitnesses =[]
+
+
 def function(x):
     return (x-3)**2 + 2
 
@@ -11,16 +13,16 @@ def fitness(x):
     return function(x)
 
 def fitnesscolculation(pop):
-    l = []
+    fitnesses =[]
     for item in pop:
-        l.append(fitness(item))
-    fitnesses = l
+        fitnesses.append((item,fitness(item)))
+    return fitnesses 
+    
 
 
-def selection(pop) :
-    besties = []
+def selection(fitnesses) :
     rouletteRusse = []
-    for i in range(len(pop)):
+    for i in range(len(fitnesses)):
         for j in range(floor(fitnesses[i])):
             rouletteRusse.append(pop[i])
     for i in range(50):
