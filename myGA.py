@@ -4,12 +4,16 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 #define global variables
+popsize=20
+elite=4
 pop = []
 newpop=[]
-a = 2
+a = 0
 b = 3
+
 #utilities
 def generatePop():
+    #CHECKED
     global pop
     radical = []
     for i in range (0,2) :
@@ -20,10 +24,12 @@ def generatePop():
     for i in radical :
         for j in radical :
             pop.append([i,j])
-    while(len(pop)!=10):
+    while(len(pop)!=popsize):
         pop.pop(rn.randint(0,len(pop)-1))
+    pop.sort(key=fitness,reverse=True)
 
 def binTofloat(l):
+    #CHECKED
     n=0
     i=4
     for k in l[0]:
@@ -44,54 +50,51 @@ def functionForBin(x):
 
 #fitness function
 def fitness(x):
-    return floor(function(binTofloat(x))*10)
+    return function(binTofloat(x))*10+20
 
 #ellitism
 def selectElite():
+    #CHECKED
     global newpop
     global pop
-    acc = pop
-    for j in range(0,2):
-        max = 0
-        for i in range(len(acc)) :
-            if functionForBin(acc[i]) > functionForBin(acc[max]) :
-                max =i
-        newpop.append(acc[max])
-        acc.pop(max)
+    newpop=pop[:elite]
 
 #selection process
 def selection() :
-    global newpop
     global pop
     rouletteRusse = []
     resultat = []
     for i in pop:
-        for j in range(fitness(i)):
+        for j in range(floor(fitness(i))):
             rouletteRusse.append(i)
-    for i in range(8):
+    for i in range(popsize-elite):
         choice=rn.randint(0,len(rouletteRusse)-1)
         resultat.append(rouletteRusse[choice])
     pop = resultat
 
 #crossover
 def crossover():
-    x=rn.randint(0,7)
-    y=rn.randint(0,7)
+    #CHECKED
+    x=rn.randint(0,popsize-elite-1)
+    y=rn.randint(0,popsize-elite-1)
+    while (x!=y):
+        y=rn.randint(0,popsize-elite-1)
     global newpop
     global pop
     if rn.randint(1,10)<=7:
-        crossOverPoint = rn.randint(0,3)
+        crossOverPoint = rn.randint(1,3)
         newpop.append([pop[x][0][:crossOverPoint]+pop[y][0][crossOverPoint:],pop[x][1]])
         newpop.append([pop[y][0][:crossOverPoint]+pop[x][0][crossOverPoint:],pop[y][1]])
 
 
 #mutation
 def mutation():
+    #CHECKED
     global newpop
-    b=rn.randint(1,4)
-    for i in newpop :
+    b=rn.randint(0,3)
+    for idx,i in enumerate(newpop) :
         s=""
-        if rn.randint(1,10)<=7:
+        if rn.randint(1,10)<=7 and idx>3:
             for j in range(4):
                 if j==b :
                     s+= "0" if i[1][b]=="1" else "1"
@@ -106,25 +109,28 @@ print("Generation population...")
 generatePop()
 #Start Genetic Algorithm Loop
 while (iteration < 50) :
-    print("Processing Generation Number "+str(iteration)+" :")
     print("====================================")
+    print("==Processing Generation Number "+str(iteration)+":==")
+    print("====================================")
+    #we apply ellitism
+    print("Promoting the elite")
+    selectElite()
+    print([(binTofloat(i),fitness(i)) for i in newpop])
     #We go through selection
     print("Selecting...")
     selection()
     #we choose two random entites to be crossovered with a 70% probability till newpop is full
-    while (len(newpop)!=10) :
+    while (len(newpop)!=popsize-elite) :
         crossover()
     print("Crossover is Over")
     #then we mutate with a 70% probability
     print("Mutating...")
     mutation()
-    #we apply ellitism
-    print("Promoting the elite")
-    selectElite()
+
     #we make new pop the actual pop
-    newpop.sort(key=functionForBin,reverse=True)
+    newpop.sort(key=fitness,reverse=True)
     pop=newpop
     print("Generation Number "+str(iteration)+" is the following:")
-    print([binTofloat(i) for i in pop])
+    print([(binTofloat(i),fitness(i)) for i in pop])
     newpop=[]
     iteration+=1
