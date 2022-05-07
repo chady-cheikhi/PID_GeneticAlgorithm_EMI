@@ -3,13 +3,6 @@ import random as rn
 import matplotlib.pyplot as plt
 import numpy as np
 
-#define global variables
-popsize=20
-elite=4
-pop = []
-newpop=[]
-a = 0
-b = 3
 
 #utilities
 def generatePop():
@@ -42,7 +35,7 @@ def binTofloat(l):
 
 #function to minimise
 def function(x):
-    return sin(-x**2)
+    return sin(-x**2)/x if x!=0 else 0
 
 def functionForBin(x):
     return function(binTofloat(x))
@@ -50,7 +43,7 @@ def functionForBin(x):
 
 #fitness function
 def fitness(x):
-    return function(binTofloat(x))*10+20
+    return function(binTofloat(x))*3+1
 
 #ellitism
 def selectElite():
@@ -81,7 +74,7 @@ def crossover():
         y=rn.randint(0,popsize-elite-1)
     global newpop
     global pop
-    if rn.randint(1,10)<=7:
+    if rn.randint(1,10)<=p_crossover:
         crossOverPoint = rn.randint(1,3)
         newpop.append([pop[x][0][:crossOverPoint]+pop[y][0][crossOverPoint:],pop[x][1]])
         newpop.append([pop[y][0][:crossOverPoint]+pop[x][0][crossOverPoint:],pop[y][1]])
@@ -94,43 +87,59 @@ def mutation():
     b=rn.randint(0,3)
     for idx,i in enumerate(newpop) :
         s=""
-        if rn.randint(1,10)<=7 and idx>3:
+        if rn.randint(1,10)<=p_mutation and idx>3:
             for j in range(4):
                 if j==b :
                     s+= "0" if i[1][b]=="1" else "1"
                 else :
                     s+=i[1][j]
             i[1]=s
-    
-#execution
-iteration=1
-#First We generate a population
-print("Generation population...")
-generatePop()
-#Start Genetic Algorithm Loop
-while (iteration < 50) :
-    print("====================================")
-    print("==Processing Generation Number "+str(iteration)+":==")
-    print("====================================")
-    #we apply ellitism
-    print("Promoting the elite")
-    selectElite()
-    print([(binTofloat(i),fitness(i)) for i in newpop])
-    #We go through selection
-    print("Selecting...")
-    selection()
-    #we choose two random entites to be crossovered with a 70% probability till newpop is full
-    while (len(newpop)!=popsize-elite) :
-        crossover()
-    print("Crossover is Over")
-    #then we mutate with a 70% probability
-    print("Mutating...")
-    mutation()
 
-    #we make new pop the actual pop
-    newpop.sort(key=fitness,reverse=True)
-    pop=newpop
-    print("Generation Number "+str(iteration)+" is the following:")
-    print([(binTofloat(i),fitness(i)) for i in pop])
-    newpop=[]
-    iteration+=1
+#define global variables
+popsize=20
+elite=2
+a = 0
+b = 10
+p_crossover=1
+p_mutation=1
+n_gen=50
+reussite =0
+for i in range(30):
+    pop = []
+    #execution
+    iteration=1
+    #First We generate a population
+    print("Generation population...")
+    generatePop()
+    #Start Genetic Algorithm Loop
+    while (iteration <= n_gen) :
+        print("====================================")
+        print("==Processing Generation Number "+str(iteration)+":==")
+        print("====================================")
+        #we apply ellitism
+        print("Promoting the elite")
+        selectElite()
+        print([(binTofloat(i),fitness(i)) for i in newpop])
+        #We go through selection
+        print("Selecting...")
+        selection()
+        #we choose two random entites to be crossovered with a 70% probability till newpop is full
+        while (len(newpop)!=popsize-elite) :
+            crossover()
+        print("Crossover is Over")
+        #then we mutate with a 70% probability
+        print("Mutating...")
+        mutation()
+
+        #we make new pop the actual pop
+        newpop.sort(key=fitness,reverse=True)
+        pop=newpop
+        print("Generation Number "+str(iteration)+" is the following:")
+
+        newpop=[]
+        iteration+=1
+    print(pop[0])
+
+        
+print("Taux de Reussite :"+str(reussite))
+
